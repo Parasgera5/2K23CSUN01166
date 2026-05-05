@@ -111,3 +111,37 @@ I would implement a combination of **Caching** and a **Push-based model**.
 *   **Performance Improvement:** It completely eliminates the need for the client to ask the server for data on subsequent page loads, dropping database read queries significantly.
 *   **Tradeoffs:** Maintaining thousands of active WebSocket connections open simultaneously requires more RAM.
 
+
+
+## Stage 5
+
+### 1. Current code
+* **It is slow:** Calling an Email API takes a second. Doing this 50,000 times in a single for loop will take hours and the server will crash.
+* **No failure safety:** If the send_email function fails on the 200th student, the entire loop crashes. The remaining 49,800 students will get absolutely nothing, and there is no way to resume where it left off.
+
+### 2. Should DB saving and Emails happen together?
+**No.** Saving to a database takes milliseconds, but sending an email takes much longer because it relies on an external network API. If the email API goes down, it shouldn't stop us from saving the notification to the database or pushing it to the app. They must be separated.
+
+### 3. The Redesign (Reliable & Fast)
+To fix this, we need to use a Message Queue (like Redis or RabbitMQ). 
+Instead of sending the emails directly, the main function just creates 50,000 "jobs" and throws them into a queue instantly. Then, background process these jobs safely. If an email fails, the queue just tries that specific job again later.
+
+### 4. Revised Pseudocode
+```javascript
+function notify_all(student_ids, message) {
+    for (let id of student_ids) {
+        MessageQueue.add("notify", { student_id: id, message: message });
+    }
+    return "processing";
+}
+
+function process_job(job) {
+    save_to_db(job.student_id, job.message);
+    push_to_app(job.student_id, job.message); 
+    
+    try {
+        send_email(job.student_id, job.message);
+    } catch (error) {
+        MessageQueue.retryLater(job); 
+    }
+}
