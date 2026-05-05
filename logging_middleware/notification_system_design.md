@@ -65,6 +65,10 @@ const notificationSchema = new mongoose.Schema({
 **Fix** - use timetolive to auto delete.
 
 ```javascript
+for fetching
 const notifications = await Notification.find({ studentId: "1", isRead: false })
   .sort({ createdAt: -1 })
+for marking as read
 await Notification.findByIdAndUpdate("id", { isRead: true });
+
+
