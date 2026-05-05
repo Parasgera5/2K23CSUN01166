@@ -158,3 +158,5 @@ When I fetch the list, I sort the array first by Weight. If two notifications ha
 ### Maintaining Top 10 Efficiently
 Sorting the entire list every time a new notification streams in is slow O(n log n). 
 To maintain the top 10 efficiently in a real app, I would use a **Min-Heap (Priority Queue)** of size 10. When a new notification arrives, I compare it to the lowest priority item in the heap (the root). If the new one is more important, I replace the root and re-balance the heap. This makes the update time instant `O(log 10)`.
+
+
