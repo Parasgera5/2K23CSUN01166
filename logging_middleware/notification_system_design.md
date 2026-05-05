@@ -72,3 +72,20 @@ for marking as read
 await Notification.findByIdAndUpdate("id", { isRead: true });
 
 
+## Stage 3
+
+### Query
+* **Is it accurate?** Yes, the logic to fetch unread notifications is correct.
+* **Why is it slow?** With 5,000,000 rows, the database is doing a full scan. It has to check every single row as there are no indexes to help it find the data quickly.
+* **Fix:** Add a index on `(studentID, isRead, createdAt)`. 
+
+### Should we index every column?
+**No** make reading fast but slows down the writing as tree has to rebuild every time new data comes in. Wastes a lot of storage space. We should only index the columns we actually search or sort by.
+
+### SQL Query (Placement in last 7 days)
+```sql
+SELECT DISTINCT studentID 
+FROM notifications 
+WHERE notificationType = 'Placement' 
+AND createdAt >= NOW() - INTERVAL 7 DAY;
+
