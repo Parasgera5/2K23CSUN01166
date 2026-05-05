@@ -1,5 +1,3 @@
-# Campus Hiring Evaluation - Notification System
-
 ## Stage 1
 
 ### 1. Core Actions
@@ -40,3 +38,32 @@
   "message": "Marked as read"
 }
 ```
+
+
+
+## Stage 2
+
+### Database Choice
+**MongoDB (NoSQL)**. 
+*Why?* As we are using mern it is obvoius to use mongodb, It is also very fast at handling high volumes of rapid reads and writes, which is necessary in a real-time notification system.
+
+### Database Schema (Mongoose)
+```javascript
+const notificationSchema = new mongoose.Schema({
+  studentId: { type: String, required: true, index: true },
+  type: { type: String, enum: ['Event', 'Result', 'Placement'], required: true },
+  message: { type: String, required: true },
+  isRead: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now }
+});
+
+### Scaling Issues & Fixes
+**1. Issue** - As millions of notifications pile up, searching for a specific student's unread messages will get very slow (database has to scan everything).
+**Fix** - add indexing which instantly tell the db that whether the user had read or not. -> like isRead or unRead
+**2. Issue** - Storage shotage
+**Fix** - use timetolive to auto delete.
+
+```javascript
+const notifications = await Notification.find({ studentId: "1", isRead: false })
+  .sort({ createdAt: -1 })
+await Notification.findByIdAndUpdate("id", { isRead: true });
