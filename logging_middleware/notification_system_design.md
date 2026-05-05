@@ -89,3 +89,25 @@ FROM notifications
 WHERE notificationType = 'Placement' 
 AND createdAt >= NOW() - INTERVAL 7 DAY;
 
+
+
+
+## Stage 4
+
+### The Problem
+The system is fetching notifications on every single page load means the database is constantly being heavily loaded with queries, even when there are no new notifications to show. 
+
+### Solutions to Improve Performance
+
+I would implement a combination of **Caching** and a **Push-based model**.
+
+**Strategy 1: Caching Layer (Redis)**
+*   **How it works:** Instead of querying the main database on every load, we store the user's unread notifications (or just the unread count) in a fast, in-memory cache like Redis.
+*   **Performance Improvement:** Redis is very fast. Reading from memory takes milliseconds compared to disk-based database queries, reducing the load on the database.
+*   **Tradeoffs:** It adds complexity.. We have to manage cache, which wants us to write extra code to ensure the cache updates whenever a new notification is added or read in the database.
+
+**Strategy 2: Real-time Push via WebSockets**
+*   **How it works:** Instead of the frontend constantly asking the server for updates, we establish a persistent WebSocket connection. The frontend only loads the initial state once. After that, the server pushes new notifications directly to the client the moment they are created.
+*   **Performance Improvement:** It completely eliminates the need for the client to ask the server for data on subsequent page loads, dropping database read queries significantly.
+*   **Tradeoffs:** Maintaining thousands of active WebSocket connections open simultaneously requires more RAM.
+
