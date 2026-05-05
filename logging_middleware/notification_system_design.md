@@ -31,6 +31,7 @@
     }
   ]
 }
+```
 
 **Patch**
 ```json
@@ -38,3 +39,4 @@
   "success": true,
   "message": "Marked as read"
 }
+```
