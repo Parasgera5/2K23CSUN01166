@@ -56,6 +56,7 @@ const notificationSchema = new mongoose.Schema({
   isRead: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
+```
 
 ### Scaling Issues & Fixes
 **1. Issue** - As millions of notifications pile up, searching for a specific student's unread messages will get very slow (database has to scan everything).
